@@ -1,7 +1,7 @@
 import { Chord, Note, Distance } from "tonal"
 import moji                      from "moji"
 
-export const translateType = (_type) => {
+export const translateType = (_type:string) => {
   const notes = [0, 0, 0, null, null, null, null]
   let type = _type
   type = moji(type).convert("ZE", "HE").toString()
@@ -9,23 +9,15 @@ export const translateType = (_type) => {
   type = type.replace(/[＃♯]/g,  "#")
   type = type.replace(/[♭ｂ]/g, "b")
   let tension
-  let omit
 
-  const omitRegex = /[\(（]?(omit|no)(\d+)[\)）]?/
-  const omitMatch = type.match(omitRegex)
-  if (omitMatch) {
-    omit = omitMatch[2]
-    type = type.replace(omitRegex, "")
-  }
-
-  const tensionRegex = /\((.+)\)/
+  const tensionRegex = /[\(（](.+)[\)）]/
   const tensionMatch = type.match(tensionRegex)
   if (tensionMatch) {
     tension = tensionMatch[1].replace(/[\s　]+/g, "").split(/[,，]/)
     type = type.replace(tensionRegex, "")
   }
 
-  const parseType = (regex) => {
+  const parseType = (regex:RegExp) => {
     if (type.match(regex)) {
       type = type.replace(regex, "")
       return true
@@ -33,7 +25,6 @@ export const translateType = (_type) => {
       return false
     }
   }
-
   // base
   switch (true) {
     case parseType(/^M(?!(7|9|11|13|aj))/): break
@@ -84,36 +75,34 @@ export const translateType = (_type) => {
   }
   // tension
   if (tension) type += tension.join("")
-  if (parseType(/[\+#]5/))  notes[2] = 1
-  if (parseType(/[-b]5/))   notes[2] = -1
-  if (parseType(/M7/))      notes[3] = 1
-  if (parseType(/7/))       notes[3] = 0
-  if (parseType(/[\+#]9/))  notes[4] = 1
-  if (parseType(/[-b]9/))   notes[4] = -1
-  if (parseType(/9/))       notes[4] = 0
-  if (parseType(/[\+#]11/)) notes[5] = 1
-  if (parseType(/[-b]11/))  notes[5] = -1
-  if (parseType(/11/))      notes[5] = 0
-  if (parseType(/[\+#]13/)) notes[6] = 1
-  if (parseType(/[-b]13/))  notes[6] = -1
-  if (parseType(/13/))      notes[6] = 0
-  // omit
-  switch (omit) {
-    case "1":  notes[0] = null; break
-    case "3":  notes[1] = null; break
-    case "5":  notes[2] = null; break
-    case "7":  notes[3] = null; break
-    case "9":  notes[4] = null; break
-    case "11": notes[5] = null; break
-    case "13": notes[6] = null; break
-  }
+  if (parseType(/[\+#]5/))     notes[2] = 1
+  if (parseType(/[-b]5/))      notes[2] = -1
+  if (parseType(/M7/))         notes[3] = 1
+  if (parseType(/7/))          notes[3] = 0
+  if (parseType(/[\+#]9/))     notes[4] = 1
+  if (parseType(/[-b]9/))      notes[4] = -1
+  if (parseType(/9/))          notes[4] = 0
+  if (parseType(/[\+#]11/))    notes[5] = 1
+  if (parseType(/[-b]11/))     notes[5] = -1
+  if (parseType(/11/))         notes[5] = 0
+  if (parseType(/[\+#]13/))    notes[6] = 1
+  if (parseType(/[-b]13/))     notes[6] = -1
+  if (parseType(/13/))         notes[6] = 0
+  if (parseType(/(omit|no)1/)) notes[0] = null;
+  if (parseType(/(omit|no)3/)) notes[1] = null;
+  if (parseType(/(omit|no)5/)) notes[2] = null;
+  if (parseType(/(omit|no)7/)) notes[3] = null;
+  if (parseType(/(omit|no)9/)) notes[4] = null;
+  if (parseType(/(omit|no)11/)) notes[5] = null;
+  if (parseType(/(omit|no)13/)) notes[6] = null;
 
-  // 翻訳できない文字列があるか、音の数が2に満たない場合はエラー
-  if (type.length > 0 || notes.filter(note => note !== null).length < 2) {
+  // 翻訳できない文字列があるか、音がない場合はエラー
+  if (type.length > 0 || notes.filter(note => note !== null).length == 0) {
     return false
   }
   return notes
 }
+
 
 const transposer = (note, interval) => Note.fromMidi(Note.midi(note) + interval)
 
