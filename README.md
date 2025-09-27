@@ -1,6 +1,6 @@
-# chord-translator
+# chord2notes
 
-> `chord-translator` translate any musical chord !
+`chord2notes` provides you the fully customizable way to turn any musical chord into notes.
 
 ## Install
 
